@@ -79,7 +79,7 @@ const AnswerSection = () => {
                     </button>
                 </>
             ) : (
-                <p>No questions available</p>
+                <p className='mt-8'>No questions available</p>
             )}
         </form>
     );

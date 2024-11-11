@@ -9,3 +9,9 @@ body {
     background-color: #0f172a;
     color: white;
 }
+
+@layer utilities {
+    .table-head { @apply p-4;}
+    .table-body { @apply py-2 px-4 border-b border-slate-700;}
+    .table-file-button { @apply bg-blue-600 px-2 py-1 rounded-xl cursor-pointer hover:bg-blue-700 duration-300;}
+}

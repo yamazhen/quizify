@@ -54,6 +54,17 @@ export function getAllQuestions(callback) {
     });
 }
 
+export function getAllQuestionsByFileName(fileName, callback) {
+    db.all("SELECT * FROM questions WHERE fileName = ?", [fileName], (err, rows) => {
+        if (err) {
+            console.error("Error retrieving questions", err.message);
+            callback(err, null);
+        } else {
+            callback(null, rows);
+        }
+    });
+}
+
 export function getResources(callback) {
     const query = `
         SELECT fileName, COUNT(*) as questionCount

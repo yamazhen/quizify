@@ -2,7 +2,7 @@ import express from "express";
 import pdfParse from "pdf-parse";
 import cors from "cors";
 import multer from "multer";
-import { getAllQuestions, getResources, saveQuestion } from "./database.js";
+import { getAllQuestions, getAllQuestionsByFileName, getResources, saveQuestion } from "./database.js";
 import { callGeminiAPI } from './geminiAi.js';
 
 const app = express();
@@ -77,6 +77,18 @@ app.get("/questions", (req, res) => {
     });
 });
 
+app.get("/questions/:fileName", (req, res) => {
+    const fileName = req.params.fileName;
+
+    getAllQuestionsByFileName(fileName, (err, rows) => {
+        if (err) {
+            res.status(500).json({ error: "Could not retrieve questions" });
+        } else {
+            res.json({ questions: rows });
+        }
+    });
+});
+
 app.get("/resources", (req,res) => {
     getResources((err, rows) => {
         if (err) {
@@ -95,7 +107,11 @@ app.post("/submit-answers", (req,res) => {
             return res.status(500).json({ error:"Could not retrieve questions" })
         }
 
-        const results = questions.map((question) => {
+        const filteredQuestions = questions.filter(question => 
+            userAnswers.some(answer => answer.questionId === question.id)
+        );
+
+        const results = filteredQuestions.map((question) => {
             const userAnswer = userAnswers.find((a) => a.questionId === question.id);
             const isCorrect = userAnswer && userAnswer.answer
                 ? Array.isArray(userAnswer.answer)
@@ -112,7 +128,7 @@ app.post("/submit-answers", (req,res) => {
         });
 
         const score = results.filter((result) => result.isCorrect).length;
-        res.json({ results, score, totalQuestions: questions.length });
+        res.json({ results, score, totalQuestions: filteredQuestions.length });
     })
 })
 

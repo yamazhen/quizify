@@ -6,9 +6,14 @@ import AnswerSection from "./components/AnswerSection";
 
 function App() {
     const [activeTab, setActiveTab] = useState('review');
+    const [selectedFileName, setSelectedFileName] = useState(null);
 
-    const handleTabClick = (tab) => {
+    const handleTabClick = (tab, fileName) => {
+        if (tab !== 'answering') {
+            setSelectedFileName(null);
+        }
         setActiveTab(tab);
+        if (fileName) setSelectedFileName(fileName);
     };
 
     return (
@@ -19,8 +24,12 @@ function App() {
             <section className="flex flex-col items-center my-8">
                 <NavButton activeTab={activeTab} onTabClick={handleTabClick}/>
                 {activeTab === 'review' && <ReviewSection onButtonClick={handleTabClick}/>}
-                {activeTab === 'questions' && <QuestionsMenu/>}
-                {activeTab === 'answering' && <AnswerSection/>}
+                {activeTab === 'questions' && (
+                    <QuestionsMenu onStartReview={(fileName) => handleTabClick('answering', fileName)}/>
+                )}
+                {activeTab === 'answering' && (
+                    <AnswerSection fileName={selectedFileName} key={selectedFileName || 'all'} />
+                )}
             </section>
         </main>
     )

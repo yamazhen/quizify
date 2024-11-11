@@ -1,13 +1,16 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 
-const AnswerSection = () => {
+const AnswerSection = ({ fileName }) => {
     const [questions, setQuestions] = useState([]);
     const [results, setResults] = useState(null);
 
     const fetchQuestions = async () => {
         try {
-            const response = await axios.get("http://localhost:3000/questions");
+            const url = fileName
+                ? `http://localhost:3000/questions/${fileName}`
+                : "http://localhost:3000/questions";
+            const response = await axios.get(url);
             setQuestions(response.data.questions); 
         } catch (error) {
             console.error("Error fetching questions:", error);
@@ -16,7 +19,7 @@ const AnswerSection = () => {
 
     useEffect(() => {
         fetchQuestions();
-    }, []);
+    }, [fileName]);
 
     const handleSubmit = async (event) => {
         event.preventDefault();

@@ -4,7 +4,7 @@ import UploadBox from './UploadBox'
 import { useEffect, useState } from 'react'
 import axios from 'axios'
 
-const QuestionsMenu = () => {
+const QuestionsMenu = ({ onStartReview }) => {
     const [resources, setResources] = useState([])
 
     const fetchResources = async () => {
@@ -39,7 +39,7 @@ const QuestionsMenu = () => {
                                 <tr key={index}>
                                     <td className='table-body'><span className='table-file-button'>{resource.fileName}</span></td>
                                     <td className='table-body text-center'>{resource.questionCount}</td>
-                                    <td className="table-body text-center"><FontAwesomeIcon icon={faCirclePlay}/></td>
+                                    <td className="table-body text-center"><FontAwesomeIcon icon={faCirclePlay} className='cursor-pointer' onClick={() => onStartReview(resource.fileName)}/></td>
                                 </tr>
                             ))
                         ) : (

@@ -15,7 +15,7 @@ const db = new sqlite3.Database("./questions.db", (err) => {
             choices TEXT,
             correctAnswer TEXT,
             difficultyLevel TEXT,
-            dateCreated TEXT
+            dateCreated TEXT,
             fileName TEXT)
             `, (err) => {
                 if (err) {
@@ -48,6 +48,23 @@ export function getAllQuestions(callback) {
         if (err) {
             console.error("Error retrieving questions", err.message);
             callback(err, null);
+        } else {
+            callback(null, rows);
+        }
+    });
+}
+
+export function getResources(callback) {
+    const query = `
+        SELECT fileName, COUNT(*) as questionCount
+        FROM questions
+        GROUP BY fileName
+        `;
+
+    db.all(query, (err, rows) => {
+        if (err) {
+            console.error("Error retrieving resources", err.message);
+            callback(err, null)
         } else {
             callback(null, rows);
         }

@@ -1,9 +1,17 @@
 import express from "express";
 import pdfParse from "pdf-parse";
-import { getAllQuestions, saveQuestion } from "./database.js";
+import cors from "cors";
+import multer from "multer";
+import { getAllQuestions, getResources, saveQuestion } from "./database.js";
+import { callGeminiAPI } from './geminiAi.js';
 
 const app = express();
 const port = 3000;
+const upload = multer();
+
+app.use(cors({
+    origin: "*",
+}))
 
 app.use(express.json());
 
@@ -18,10 +26,10 @@ app.post('/text', async (req,res) => {
     }
 });
 
-app.post('/upload-pdf', express.raw({ type: "application/pdf", limit: "100mb" }), async (req,res) => {
+app.post('/upload-pdf', upload.single("pdf"), async (req,res) => {
     try {
         const fileName = req.headers['file-name'] || "unknown.pdf";
-        const dataBuffer = await pdfParse(req.body);
+        const dataBuffer = await pdfParse(req.file.buffer);
         const extractedText = dataBuffer.text;
         const prompt = `Based on the following lecture content generate a list of questions.
             Lecture content: ${extractedText}.
@@ -68,6 +76,45 @@ app.get("/questions", (req, res) => {
         }
     });
 });
+
+app.get("/resources", (req,res) => {
+    getResources((err, rows) => {
+        if (err) {
+            res.status(500).json({ error: "Could not retrieve resources" })
+        } else {
+            res.json({ questions: rows });
+        }
+    })
+});
+
+app.post("/submit-answers", (req,res) => {
+    const userAnswers = req.body.answers;
+
+    getAllQuestions((err, questions) => {
+        if(err) {
+            return res.status(500).json({ error:"Could not retrieve questions" })
+        }
+
+        const results = questions.map((question) => {
+            const userAnswer = userAnswers.find((a) => a.questionId === question.id);
+            const isCorrect = userAnswer && userAnswer.answer
+                ? Array.isArray(userAnswer.answer)
+                    ? userAnswer.answer.some((ans) => ans.trim().toLowerCase() === question.correctAnswer.trim().toLowerCase())
+                    : userAnswer.answer.trim().toLowerCase() === question.correctAnswer.trim().toLowerCase()
+                : false;
+            return {
+                questionId: question.id,
+                questionText: question.questionText,
+                userAnswer: userAnswer ? userAnswer.answer : null,
+                correctAnswer: question.correctAnswer,
+                isCorrect,
+            };
+        });
+
+        const score = results.filter((result) => result.isCorrect).length;
+        res.json({ results, score, totalQuestions: questions.length });
+    })
+})
 
 
 app.listen(port, () => {

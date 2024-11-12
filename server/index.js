@@ -54,7 +54,6 @@ app.post('/upload-pdf', upload.single("pdf"), async (req,res) => {
                     difficultyLevel: question.difficultyLevel,
                     dateCreated: new Date().toISOString()
                 };
-                // Save each question to SQLite
                 saveQuestion(questionData);
             }
             res.json({ questions: response.questions });

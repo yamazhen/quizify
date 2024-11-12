@@ -4,7 +4,7 @@ const db = new sqlite3.Database("./questions.db", (err) => {
     if (err) {
         console.log(err.message);
     } else {
-        console.log("SQLite connected");
+        console.log("Database connected");
         db.run(`
             CREATE TABLE IF NOT EXISTS questions 
             (id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -20,8 +20,6 @@ const db = new sqlite3.Database("./questions.db", (err) => {
             `, (err) => {
                 if (err) {
                     console.log(err.message)
-                } else {
-                    console.log("Question table init.")
                 }
             }); 
     }
